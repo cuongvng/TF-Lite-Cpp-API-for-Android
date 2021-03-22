@@ -26,6 +26,9 @@ bazel build -c opt //tensorflow/lite:libtensorflowlite.so --fat_apk_cpu=arm64-v8
 bazel build -c opt //tensorflow/lite:libtensorflowlite.so --fat_apk_cpu=arm-v7a
 ```
 
+Notice how the build commands are different from [TF Lite guides](https://www.tensorflow.org/lite/guide/android#use_tflite_c_api):
+`--config=android_arm64` and `--config=android_arm` are replaced by `--fat_apk_cpu=arm64-v8a` and `--fat_apk_cpu=arm-v7a`, respectively.
+
 The generated library would be saved at `./bazel-bin/tensorflow/lite/libtensorflowlite.so`.
 
 ### On Linux

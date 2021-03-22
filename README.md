@@ -29,7 +29,7 @@ bazel build -c opt //tensorflow/lite:libtensorflowlite.so --fat_apk_cpu=arm-v7a
 The generated library would be saved at `./bazel-bin/tensorflow/lite/libtensorflowlite.so`.
 
 ### On Linux
-Almost similar, exept for installing Bazel (a little more complicated).
+Almost similar, except for installing Bazel (a little more complicated).
 For more details, please check out the notebook [run_me.ipynb](./run_me.ipynb).
 
 ---

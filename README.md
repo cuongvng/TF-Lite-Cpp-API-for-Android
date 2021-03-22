@@ -15,6 +15,7 @@ brew install bazel
 - Clone the [TensorFlow repo](https://github.com/tensorflow/tensorflow)
 ```
 git clone https://github.com/tensorflow/tensorflow
+cd tensorflow/
 ```
 
 - Build the libraries
@@ -25,8 +26,11 @@ bazel build -c opt //tensorflow/lite:libtensorflowlite.so --fat_apk_cpu=arm64-v8
 bazel build -c opt //tensorflow/lite:libtensorflowlite.so --fat_apk_cpu=arm-v7a
 ```
 
+The generated library would be saved at `./bazel-bin/tensorflow/lite/libtensorflowlite.so`.
+
 ### On Linux
-Run the commands listed on the notebook [run_me.ipynb](./run_me.ipynb).
+Almost similar, exept for installing Bazel (a little more complicated).
+For more details, please check out the notebook [run_me.ipynb](./run_me.ipynb).
 
 ---
 *If you find this repo useful, please give it a star!*

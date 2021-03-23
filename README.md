@@ -16,6 +16,9 @@ This repo shows more detailed instructions to build the libraries for using C++ 
 If you don't care about the process, just go ahead and get the generated libraries (for *32bit armeabi-v7a* and *64bit arm64-v8a*) in the folder [generated-libs](./generated-libs).
 
 ### How to build TF Lite C++ library
+<details><summary>Click to expand/collapse</summary>
+<p>
+
 - Step 1: [Install Bazel](https://docs.bazel.build/versions/4.0.0/install.html) 
 
 - Step 2: Clone the [TensorFlow repo](https://github.com/tensorflow/tensorflow)
@@ -110,10 +113,17 @@ bazel build -c opt --config=android_arm64 //tensorflow/lite:libtensorflowlite.so
 It should work without errors.
 The generated library would be saved at `./bazel-bin/tensorflow/lite/libtensorflowlite.so`.
 
+</p>
+</details>
+
 ### How to integrate the libraries in Android apps
+<details><summary>Click to expand/collapse</summary>
+<p>
 - Include all header file
 - FlatBuffers
 - Abseil
+</p>
+</details>
 
 ---
 *If you find this repo useful, please give it a star!*

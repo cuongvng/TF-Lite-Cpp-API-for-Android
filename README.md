@@ -15,7 +15,7 @@ This repo shows more detailed instructions to build the libraries for using C++ 
 
 If you don't care about the process, just go ahead and get the generated libraries (for *32bit armeabi-v7a* and *64bit arm64-v8a*) in the folder [generated-libs](./generated-libs).
 
-### How to build TF Lite C++ library
+### Step by step guide to build TF Lite C++ libraries
 <details><summary>Click to expand/collapse</summary>
 <p>
 
@@ -27,8 +27,8 @@ git clone https://github.com/tensorflow/tensorflow
 cd ./tensorflow/
 ```
 
-- **Step 3: Configure Android build **
-**Before running the `bazel build ...` command, you need to configure the build process. Do so by executing 
+- **Step 3: Configure Android build**
+Before running the `bazel build ...` command, you need to configure the build process. Do so by executing 
 
 ```
 ./configure
@@ -44,6 +44,7 @@ Please specify the location of python. [Default is /Library/Developer/CommandLin
 First is the location of python, because `./configure` executes the `.configure.py` file.
 Choose the location that has Numpy installed, otherwise the later build will fail.
 Here I point it to the python executable of a conda environment.
+
 Next, 
 
 ```
@@ -52,6 +53,7 @@ Found possible Python library paths:
 Please input the desired Python library path to use.  Default is [/Users/cuongvng/opt/miniconda3/envs/style-transfer-tf-lite/lib/python3.7/site-packages]
 ```
 I press `Enter` to use the default site-packages, which contains necessary libraries to build TF.
+
 Next,
 ```
 Do you wish to build TensorFlow with ROCm support? [y/N]: N
@@ -74,7 +76,8 @@ Searching for NDK and SDK installations.
 
 Please specify the home path of the Android NDK to use. [Default is /Users/cuongvng/library/Android/Sdk/ndk-bundle]: /Users/cuongvng/Library/Android/sdk/ndk/21.1.6352462
 ```
-That is the home path of the Android NDK (version 21.1.6352462) on my local machine. Note that when you `ls` the path, it must include `platforms`, e.g.:
+That is the home path of the Android NDK (version 21.1.6352462) on my local machine. 
+Note that when you `ls` the path, it must include `platforms`, e.g.:
 ```
 $ ls /Users/cuongvng/Library/Android/sdk/ndk/21.1.6352462
 CHANGELOG.md      build             ndk-stack         prebuilt          source.properties wrap.sh
@@ -116,12 +119,80 @@ The generated library would be saved at `./bazel-bin/tensorflow/lite/libtensorfl
 </p>
 </details>
 
-### How to integrate the libraries in Android apps
+### How to integrate the libraries in Android apps (using Android Studio)
 <details><summary>Click to expand/collapse</summary>
 <p>
-- Include all header file
-- FlatBuffers
-- Abseil
+
+This repo consists of:
+- Pre-built TF Lite C++ libraries for `armeabi-v7a` and `arm64-v8a` ABIs in the [./generated-libs](./generated-libs) directory.
+- All header files needed in the [./include](./include) directory, as stated in the [guide](https://www.tensorflow.org/lite/guide/android#use_tflite_c_api)
+> Currently, there is no straightforward way to extract all header files needed, so you must include all header files in tensorflow/lite/ from the TensorFlow repository. Additionally, you will need header files from FlatBuffers and Abseil.
+The tensorflow headers are at commit @8f46088df45cc9824b2901378106572aa0a89406.
+
+**Guide to import the libraries:**
+- Create a new android studio project with native C++ [](https://developer.android.com/studio/projects/add-native-code#new-project)
+- At the project root, initialize it as a git repo by
+```
+$ git init
+```
+- Then `cd` to `app/src/main/cpp/
+- Add this repo as a git submodule (recursively, as this repo has other submodules), by
+```
+$ git submodule add  https://github.com/cuongvng/TF-Lite-Cpp-API-for-Android tf-lite-api
+$ git submodule update --init --recursive
+```
+
+- Set ABI filters in `build.gradle (app)`, inside `android.defaultConfig.externalNativeBuild.cmake`
+```
+android {
+    ...
+    defaultConfig {
+        ...
+        externalNativeBuild {
+            cmake {
+                cppFlags "-frtti -fexceptions"
+                abiFilters 'armeabi-v7a', 'arm64-v8a'
+            }
+        }
+        ...
+    }
+
+```
+
+- Modify `CMakeLists.txt` to link your app with the prebuilt TF Lite libs
+```
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html
+
+# Sets the minimum version of CMake required to build the native library.
+
+cmake_minimum_required(VERSION 3.10.2)
+
+project("tflitecxx")
+
+# Specify where to find the header files for TF Lite C++
+set( INCLUDE_DIRS
+        ${CMAKE_CURRENT_LIST_DIR}/tf-lite-api/include
+        ${CMAKE_CURRENT_LIST_DIR}/tf-lite-api/include/flatbuffers/include)
+include_directories(${INCLUDE_DIRS})
+
+add_library( tflite SHARED IMPORTED )
+set_target_properties( tflite PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_CURRENT_LIST_DIR}/tf-lite-api/generated-libs/${ANDROID_ABI}/libtensorflowlite.so )
+
+# Build the main target `native-lib` that will use TF Lite
+add_library( native-lib SHARED native-lib.cpp )
+
+find_library( log-lib log ) # Library required by NDK.
+find_library(android-lib android) # for AssetManager functionality
+
+# Link the main target with two required libs: `log` and `libtensorflowlite.so`
+target_link_libraries( native-lib ${log-lib} ${android-lib} tflite)
+```
+
+I have created a [example app](https://github.com/cuongvng/TF-Lite-Cpp-API-Android-Example) that shows how to integrate the TF Lite C++ APIs in an Android app, to load a `.tflite` model.
+Check it out!
+
 </p>
 </details>
 
